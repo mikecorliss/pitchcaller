@@ -147,7 +147,15 @@ export const WristbandGrid: React.FC<WristbandGridProps> = ({ config, signals, p
           {renderSection(1, 1)}
           {renderSection(1, 2)}
         </div>
+      </div>
 
+      {/* Pitch Out Footer */}
+      <div className={`bg-white border-t-2 border-black flex items-center justify-between px-3 flex-shrink-0 ${isPrintMode ? 'h-[9%]' : 'p-1.5'}`}>
+          <span className={`font-bold uppercase leading-none ${isPrintMode ? 'text-[7px]' : 'text-sm'}`}>Pitch Out</span>
+          <div className={`flex gap-4 font-bold leading-none ${isPrintMode ? 'text-[7px]' : 'text-sm'}`}>
+            <span>333</span>
+            <span>999</span>
+          </div>
       </div>
     </div>
   );

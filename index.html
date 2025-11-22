@@ -16,6 +16,13 @@
           height: auto !important; 
           overflow: visible !important; 
           background-color: white !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+        /* Force all elements to print background colors */
+        * {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
         }
         .no-print { display: none !important; }
         .print-only { display: block !important; position: static !important; }
