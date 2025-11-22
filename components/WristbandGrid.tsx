@@ -28,17 +28,17 @@ export const WristbandGrid: React.FC<WristbandGridProps> = ({ config, signals, p
     return { code, pitch };
   };
 
-  // Dynamic text sizing
+  // Dynamic text sizing optimized for print
   const getFontSize = () => {
-    if (!isPrintMode) return { base: 'text-sm', abbr: 'text-base', header: 'text-xs' };
+    if (!isPrintMode) return { base: 'text-sm', abbr: 'text-sm', header: 'text-xs' };
     
-    // For print, scale based on section size
+    // Fine-tuned print sizes
     if (sectionSize === 5) return { base: 'text-[5px]', abbr: 'text-[5px]', header: 'text-[5px]' };
     if (sectionSize === 4) return { base: 'text-[7px]', abbr: 'text-[6px]', header: 'text-[6px]' };
-    return { base: 'text-[9px]', abbr: 'text-[8px]', header: 'text-[8px]' };
+    return { base: 'text-[9px]', abbr: 'text-[8.5px]', header: 'text-[8px]' };
   };
 
-  const { base: baseTextSize, abbr: abbrTextSize, header: headerTextSize } = getFontSize();
+  const { abbr: abbrTextSize, header: headerTextSize } = getFontSize();
 
   // Helper to render a single section
   const renderSection = (sectionRowIndex: number, sectionColIndex: number) => {
@@ -51,11 +51,11 @@ export const WristbandGrid: React.FC<WristbandGridProps> = ({ config, signals, p
     const sectionCols = allColHeaders.slice(colStart, colEnd);
 
     return (
-      <div className="flex flex-col border border-black bg-white flex-1 h-full">
+      <div className="flex flex-col border border-black bg-white flex-1 h-full box-border">
         {/* Column Headers */}
-        <div className="flex border-b border-black bg-blue-100 h-[15%]">
-          {/* Corner spacer for row headers */}
-          <div className="border-r border-black w-[15%] flex-shrink-0"></div>
+        <div className="flex border-b border-black bg-slate-200 h-[15%] print:bg-gray-200">
+          {/* Corner spacer */}
+          <div className="border-r border-black w-[15%] flex-shrink-0 bg-slate-300 print:bg-gray-300"></div>
           {sectionCols.map((header, i) => (
             <div 
               key={`h-${i}`} 
@@ -75,7 +75,7 @@ export const WristbandGrid: React.FC<WristbandGridProps> = ({ config, signals, p
             >
               {/* Row Header */}
               <div 
-                className={`font-bold bg-blue-100 flex items-center justify-center border-r border-black w-[15%] flex-shrink-0 leading-none ${headerTextSize}`}
+                className={`font-bold bg-slate-200 print:bg-gray-200 flex items-center justify-center border-r border-black w-[15%] flex-shrink-0 leading-none ${headerTextSize}`}
               >
                 {rowLabel}
               </div>
@@ -86,7 +86,7 @@ export const WristbandGrid: React.FC<WristbandGridProps> = ({ config, signals, p
                 return (
                   <div 
                     key={`c-${cIdx}`} 
-                    className="flex-1 flex items-center justify-center border-r border-black last:border-r-0 relative overflow-hidden"
+                    className="flex-1 flex items-center justify-center border-r border-black last:border-r-0 relative overflow-hidden print:print-color-adjust-exact"
                     style={{ backgroundColor: pitch ? pitch.color : 'white' }}
                   >
                     {pitch && (
@@ -109,7 +109,7 @@ export const WristbandGrid: React.FC<WristbandGridProps> = ({ config, signals, p
 
   // Layout constants
   const gapClass = isPrintMode ? 'gap-[2px]' : 'gap-2';
-  const containerPadding = isPrintMode ? 'p-[1px]' : 'p-2';
+  const containerPadding = isPrintMode ? 'p-[2px]' : 'p-2';
 
   // Dynamic dimensions for print
   const containerStyle = isPrintMode ? { 
@@ -121,18 +121,18 @@ export const WristbandGrid: React.FC<WristbandGridProps> = ({ config, signals, p
 
   return (
     <div 
-      className={`bg-white overflow-hidden flex flex-col ${isPrintMode ? '' : 'w-full max-w-3xl rounded-xl shadow-lg border border-slate-200'}`}
+      className={`bg-white overflow-hidden flex flex-col ${isPrintMode ? '' : 'w-full max-w-4xl rounded-xl shadow-2xl border border-slate-800'}`}
       style={containerStyle}
     >
-      {/* Header - Changed to White Background */}
-      <div className={`bg-white border-b-2 border-black flex items-center justify-center flex-shrink-0 ${isPrintMode ? 'h-[12%]' : 'p-3'}`}>
-         <h2 className={`font-bold text-black uppercase leading-none text-center ${isPrintMode ? 'text-[10px]' : 'text-xl'}`}>
-           {config.teamName} Pitch Calls
+      {/* Header - Customizable */}
+      <div className={`bg-black border-b-2 border-black flex items-center justify-center flex-shrink-0 ${isPrintMode ? 'h-[11%]' : 'p-2'}`}>
+         <h2 className={`font-bold text-white uppercase leading-none text-center tracking-wider ${isPrintMode ? 'text-[10px]' : 'text-xl'}`}>
+           {config.teamName}
          </h2>
       </div>
 
       {/* Grid Container - Split into 6 sections with gaps */}
-      <div className={`flex-1 flex flex-col bg-white ${gapClass} ${containerPadding}`}>
+      <div className={`flex-1 flex flex-col bg-black ${gapClass} ${containerPadding}`}>
         
         {/* Top Half (Sections 1, 2, 3) */}
         <div className={`flex-1 flex ${gapClass}`}>
@@ -149,13 +149,6 @@ export const WristbandGrid: React.FC<WristbandGridProps> = ({ config, signals, p
         </div>
 
       </div>
-
-      {/* Footer */}
-      {isPrintMode && (
-        <div className="bg-gray-300 text-center text-[6px] font-bold border-t border-black py-[1px] leading-none flex-shrink-0">
-          Pitch Out Equals 333 or 999
-        </div>
-      )}
     </div>
   );
 };

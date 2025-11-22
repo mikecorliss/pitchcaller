@@ -5,15 +5,15 @@ import { PrintLayout } from './components/PrintLayout';
 import { CoachKey } from './components/CoachKey';
 import { DEFAULT_PITCHES, WRISTBAND_GRID_SIZES } from './constants';
 import { PitchDefinition, SignalEntry, WristbandConfig } from './types';
+import { AlertCircle, CheckCircle2 } from 'lucide-react';
 
 const App: React.FC = () => {
   // --- State ---
-  // Default to the first option (3x3 sections = 9 cols x 6 rows)
   const defaultSize = WRISTBAND_GRID_SIZES[0];
   
   const [config, setConfig] = useState<WristbandConfig>({
     title: `Game ${new Date().toLocaleDateString()}`,
-    teamName: 'Reds',
+    teamName: 'SOFTBALL',
     columns: defaultSize.cols,
     rows: defaultSize.rows,
     sectionSize: defaultSize.sectionSize,
@@ -22,42 +22,50 @@ const App: React.FC = () => {
     colStep: 10,
     rowStart: 1,
     rowStep: 1,
-    printWidth: 3.75, // Default width in inches
-    printHeight: 2.0  // Default height in inches
+    printWidth: 4.5,
+    printHeight: 2.75
   });
 
   const [pitches, setPitches] = useState<PitchDefinition[]>(DEFAULT_PITCHES);
   const [signals, setSignals] = useState<SignalEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   // --- Effects ---
   useEffect(() => {
-    if (signals.length === 0) {
-      handleReset();
-    }
+    // Initial generation on mount if empty? No, let user choose.
+    // Actually, let's clear on mount to force user to see the state
+    handleReset();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Clear messages after timeout
+  useEffect(() => {
+    if (error || successMsg) {
+      const timer = setTimeout(() => {
+        setError(null);
+        setSuccessMsg(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error, successMsg]);
 
   // --- Handlers ---
   const handleGenerate = () => {
     setError(null);
+    setSuccessMsg(null);
     
-    // Validation: Check percentages
     const totalPercentage = pitches.reduce((sum, p) => sum + (p.percentage || 0), 0);
     
-    // Use a small epsilon for float comparison logic, though integers are typical
     if (Math.abs(totalPercentage - 100) > 0.1) {
-      const msg = `Error: Pitch percentages must add up to 100%.\nCurrent total: ${totalPercentage}%`;
-      setError(msg);
-      alert(msg); // Popup as requested
+      setError(`Percentages must equal 100%. Current: ${totalPercentage}%`);
       return;
     }
 
     try {
-      // Calculate total slots based on grid config
       const totalSlots = config.columns * config.rows;
       
-      // Calculate slot counts for each pitch based on percentage (Largest Remainder Method)
+      // Calculate slot counts (Largest Remainder Method)
       const countsAndRemainders = pitches.map((p, idx) => {
         const exactCount = totalSlots * (p.percentage / 100);
         const floorCount = Math.floor(exactCount);
@@ -65,22 +73,17 @@ const App: React.FC = () => {
         return { id: p.id, count: floorCount, remainder, idx };
       });
 
-      // Calculate how many slots are still missing after flooring
       const currentTotal = countsAndRemainders.reduce((sum, item) => sum + item.count, 0);
       let deficit = totalSlots - currentTotal;
 
-      // Sort by remainder (descending) to distribute deficit
       countsAndRemainders.sort((a, b) => b.remainder - a.remainder);
 
-      // Distribute the remaining slots
       for (let i = 0; i < deficit; i++) {
         countsAndRemainders[i].count++;
       }
 
-      // Re-sort by index to maintain original order (optional, but clean)
       countsAndRemainders.sort((a, b) => a.idx - b.idx);
 
-      // Build the deck
       const deck: string[] = [];
       countsAndRemainders.forEach(item => {
         for (let i = 0; i < item.count; i++) {
@@ -88,52 +91,45 @@ const App: React.FC = () => {
         }
       });
 
-      // Fallback safety: if deck is somehow larger than slots (rounding errors), trim it.
-      // If smaller (e.g. 0% total), fill with first pitch or empty.
-      while (deck.length > totalSlots) deck.pop();
-      while (deck.length < totalSlots && pitches.length > 0) deck.push(pitches[0].id);
-
-      // Shuffle the deck (Fisher-Yates)
+      // Fisher-Yates Shuffle
       for (let i = deck.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [deck[i], deck[j]] = [deck[j], deck[i]];
       }
 
-      // Map linear deck to grid
       const newSignals: SignalEntry[] = [];
       let listIndex = 0;
 
       for (let r = 0; r < config.rows; r++) {
         for (let c = 0; c < config.columns; c++) {
           if (listIndex >= deck.length) break;
-          
           const rowLabel = (config.rowStart + r * config.rowStep).toString();
           const colLabel = (config.colStart + c * config.colStep).toString();
-          const code = `${rowLabel}${colLabel}`;
-          
           newSignals.push({
-            code,
+            code: `${rowLabel}${colLabel}`,
             pitchId: deck[listIndex]
           });
-          
           listIndex++;
         }
       }
 
       setSignals(newSignals);
+      setSuccessMsg("Signal grid generated successfully!");
     } catch (err) {
-      setError("Failed to generate signals. Please try again.");
+      setError("Failed to generate signals.");
       console.error(err);
     }
   };
 
   const handleReset = () => {
     setSignals([]);
+    setError(null);
+    setSuccessMsg(null);
   };
 
   // --- Render ---
   return (
-    <div className="h-screen w-screen flex overflow-hidden bg-slate-100">
+    <div className="h-screen w-screen flex overflow-hidden bg-slate-100 font-sans text-slate-900">
       {/* Sidebar */}
       <Controls
         config={config}
@@ -144,48 +140,68 @@ const App: React.FC = () => {
         onReset={handleReset}
       />
 
-      {/* Main Content Area */}
+      {/* Main Content */}
       <div className="flex-1 flex flex-col h-full overflow-hidden relative no-print">
-        {/* Toolbar */}
-        <div className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 flex-shrink-0">
+        
+        {/* Top Bar */}
+        <div className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 flex-shrink-0 shadow-sm z-10">
           <div className="flex items-center gap-4">
-            <h2 className="text-lg font-semibold text-slate-800">Preview</h2>
-            <span className="bg-slate-100 text-slate-500 text-xs px-2 py-1 rounded-full border border-slate-200">
-              {config.columns * config.rows} call slots ({config.sectionSize}x{config.sectionSize} sections)
-            </span>
+            <h2 className="text-lg font-bold text-slate-700">Wristband Preview</h2>
+            <div className="hidden md:flex items-center gap-2 text-xs text-slate-400 bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
+              <span>{config.columns * config.rows} slots</span>
+              <span>•</span>
+              <span>{config.sectionSize}x{config.sectionSize} grid</span>
+            </div>
           </div>
-          {error && (
-             <div className="text-red-600 text-sm bg-red-50 px-3 py-1 rounded border border-red-100 animate-pulse">
-               {error}
-             </div>
-          )}
+
+          {/* Alerts */}
+          <div className="flex items-center gap-4">
+             {error && (
+               <div className="flex items-center gap-2 text-red-600 bg-red-50 px-4 py-1.5 rounded-md border border-red-100 text-sm font-medium animate-in fade-in slide-in-from-top-2">
+                 <AlertCircle size={16} />
+                 {error}
+               </div>
+             )}
+             {successMsg && (
+               <div className="flex items-center gap-2 text-green-600 bg-green-50 px-4 py-1.5 rounded-md border border-green-100 text-sm font-medium animate-in fade-in slide-in-from-top-2">
+                 <CheckCircle2 size={16} />
+                 {successMsg}
+               </div>
+             )}
+          </div>
         </div>
 
         {/* Preview Canvas */}
-        <div className="flex-1 overflow-y-auto p-8 bg-slate-200">
-          <div className="flex flex-col xl:flex-row gap-8 justify-center items-start max-w-6xl mx-auto">
+        <div className="flex-1 overflow-y-auto p-6 md:p-10 bg-slate-100/50">
+          <div className="max-w-7xl mx-auto flex flex-col xl:flex-row gap-10 items-start justify-center">
             
             {/* Player Card Preview */}
-            <div className="flex flex-col gap-2 items-center flex-shrink-0">
-              <h3 className="text-slate-500 text-sm font-medium">Player Card Preview</h3>
-              <WristbandGrid 
-                config={config} 
-                signals={signals} 
-                pitches={pitches} 
-                isPrintMode={false}
-              />
-              <p className="text-xs text-slate-400 max-w-[300px] text-center">
-                 Set size in left panel. Current print size: {config.printWidth}" x {config.printHeight}"
+            <div className="flex flex-col gap-4 items-center flex-shrink-0 w-full xl:w-auto">
+              <div className="bg-white p-1 rounded-2xl shadow-xl border border-slate-200">
+                 {/* Render actual preview */}
+                 <div className="p-4 bg-white rounded-xl">
+                    <WristbandGrid 
+                      config={config} 
+                      signals={signals} 
+                      pitches={pitches} 
+                      isPrintMode={false}
+                    />
+                 </div>
+              </div>
+              <p className="text-xs font-medium text-slate-400 text-center">
+                 Actual Print Size: {config.printWidth}" x {config.printHeight}"
               </p>
             </div>
 
             {/* Coach Key Preview */}
-            <div className="flex flex-col gap-2 items-center w-full max-w-xl">
-              <h3 className="text-slate-500 text-sm font-medium">Coach Key Preview</h3>
-              <CoachKey 
-                pitches={pitches} 
-                signals={signals} 
-              />
+            <div className="flex flex-col gap-4 w-full max-w-2xl mx-auto xl:mx-0">
+               <div className="bg-white p-6 rounded-xl shadow-lg border border-slate-200 w-full">
+                  <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Coach Key Preview</h3>
+                  <CoachKey 
+                    pitches={pitches} 
+                    signals={signals} 
+                  />
+               </div>
             </div>
 
           </div>
