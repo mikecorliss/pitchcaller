@@ -1,0 +1,5 @@
+{
+  "name": "Wristband Pitching Card",
+  "description": "A softball/baseball pitch calling wristband generator. Create custom signal grids optimized for your pitchers.",
+  "requestFramePermissions": []
+}

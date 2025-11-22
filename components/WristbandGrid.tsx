@@ -1,0 +1,169 @@
+import React from 'react';
+import { SignalEntry, PitchDefinition, WristbandConfig } from '../types';
+
+interface WristbandGridProps {
+  config: WristbandConfig;
+  signals: SignalEntry[];
+  pitches: PitchDefinition[];
+  isPrintMode?: boolean;
+}
+
+export const WristbandGrid: React.FC<WristbandGridProps> = ({ config, signals, pitches, isPrintMode = false }) => {
+  // Generate all headers first
+  const allColHeaders = Array.from({ length: config.columns }).map((_, i) => 
+    (config.colStart + i * config.colStep).toString()
+  );
+  
+  const allRowHeaders = Array.from({ length: config.rows }).map((_, i) => 
+    (config.rowStart + i * config.rowStep).toString()
+  );
+
+  const sectionSize = config.sectionSize || 3;
+  
+  // Helper to get pitch content
+  const getCellContent = (rowLabel: string, colLabel: string) => {
+    const code = `${rowLabel}${colLabel}`;
+    const signal = signals.find(s => s.code === code);
+    const pitch = signal ? pitches.find(p => p.id === signal.pitchId) : null;
+    return { code, pitch };
+  };
+
+  // Dynamic text sizing
+  const getFontSize = () => {
+    if (!isPrintMode) return { base: 'text-sm', abbr: 'text-base', header: 'text-xs' };
+    
+    // For print, scale based on section size
+    if (sectionSize === 5) return { base: 'text-[5px]', abbr: 'text-[5px]', header: 'text-[5px]' };
+    if (sectionSize === 4) return { base: 'text-[7px]', abbr: 'text-[6px]', header: 'text-[6px]' };
+    return { base: 'text-[9px]', abbr: 'text-[8px]', header: 'text-[8px]' };
+  };
+
+  const { base: baseTextSize, abbr: abbrTextSize, header: headerTextSize } = getFontSize();
+
+  // Helper to render a single section
+  const renderSection = (sectionRowIndex: number, sectionColIndex: number) => {
+    const rowStart = sectionRowIndex * sectionSize;
+    const rowEnd = rowStart + sectionSize;
+    const colStart = sectionColIndex * sectionSize;
+    const colEnd = colStart + sectionSize;
+
+    const sectionRows = allRowHeaders.slice(rowStart, rowEnd);
+    const sectionCols = allColHeaders.slice(colStart, colEnd);
+
+    return (
+      <div className="flex flex-col border border-black bg-white flex-1 h-full">
+        {/* Column Headers */}
+        <div className="flex border-b border-black bg-blue-100 h-[15%]">
+          {/* Corner spacer for row headers */}
+          <div className="border-r border-black w-[15%] flex-shrink-0"></div>
+          {sectionCols.map((header, i) => (
+            <div 
+              key={`h-${i}`} 
+              className={`flex-1 flex items-center justify-center font-bold text-black leading-none border-r border-black last:border-r-0 ${headerTextSize}`}
+            >
+              {header}
+            </div>
+          ))}
+        </div>
+
+        {/* Rows */}
+        <div className="flex-1 flex flex-col">
+          {sectionRows.map((rowLabel, rIdx) => (
+            <div 
+              key={`r-${rIdx}`} 
+              className="flex flex-1 border-b border-black last:border-b-0"
+            >
+              {/* Row Header */}
+              <div 
+                className={`font-bold bg-blue-100 flex items-center justify-center border-r border-black w-[15%] flex-shrink-0 leading-none ${headerTextSize}`}
+              >
+                {rowLabel}
+              </div>
+
+              {/* Cells */}
+              {sectionCols.map((colLabel, cIdx) => {
+                const { pitch } = getCellContent(rowLabel, colLabel);
+                return (
+                  <div 
+                    key={`c-${cIdx}`} 
+                    className="flex-1 flex items-center justify-center border-r border-black last:border-r-0 relative overflow-hidden"
+                    style={{ backgroundColor: pitch ? pitch.color : 'white' }}
+                  >
+                    {pitch && (
+                      <span 
+                        className={`font-black leading-none ${abbrTextSize}`}
+                        style={{ color: getContrastColor(pitch.color) }}
+                      >
+                        {pitch.abbreviation}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  // Layout constants
+  const gapClass = isPrintMode ? 'gap-[2px]' : 'gap-2';
+  const containerPadding = isPrintMode ? 'p-[1px]' : 'p-2';
+
+  // Dynamic dimensions for print
+  const containerStyle = isPrintMode ? { 
+    width: `${config.printWidth}in`,
+    height: `${config.printHeight}in`,
+    border: '2px solid black',
+    boxSizing: 'border-box' as const
+  } : {};
+
+  return (
+    <div 
+      className={`bg-white overflow-hidden flex flex-col ${isPrintMode ? '' : 'w-full max-w-3xl rounded-xl shadow-lg border border-slate-200'}`}
+      style={containerStyle}
+    >
+      {/* Header - Changed to White Background */}
+      <div className={`bg-white border-b-2 border-black flex items-center justify-center flex-shrink-0 ${isPrintMode ? 'h-[12%]' : 'p-3'}`}>
+         <h2 className={`font-bold text-black uppercase leading-none text-center ${isPrintMode ? 'text-[10px]' : 'text-xl'}`}>
+           {config.teamName} Pitch Calls
+         </h2>
+      </div>
+
+      {/* Grid Container - Split into 6 sections with gaps */}
+      <div className={`flex-1 flex flex-col bg-white ${gapClass} ${containerPadding}`}>
+        
+        {/* Top Half (Sections 1, 2, 3) */}
+        <div className={`flex-1 flex ${gapClass}`}>
+          {renderSection(0, 0)}
+          {renderSection(0, 1)}
+          {renderSection(0, 2)}
+        </div>
+
+        {/* Bottom Half (Sections 4, 5, 6) */}
+        <div className={`flex-1 flex ${gapClass}`}>
+          {renderSection(1, 0)}
+          {renderSection(1, 1)}
+          {renderSection(1, 2)}
+        </div>
+
+      </div>
+
+      {/* Footer */}
+      {isPrintMode && (
+        <div className="bg-gray-300 text-center text-[6px] font-bold border-t border-black py-[1px] leading-none flex-shrink-0">
+          Pitch Out Equals 333 or 999
+        </div>
+      )}
+    </div>
+  );
+};
+
+function getContrastColor(hexColor: string) {
+  const hex = hexColor.replace('#', '');
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  return (r * 0.299 + g * 0.587 + b * 0.114) > 140 ? 'black' : 'white';
+}
