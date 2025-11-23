@@ -4,12 +4,12 @@ A React application for generating softball/baseball pitch calling wristbands.
 
 ## Docker Deployment
 
-This project includes a `Dockerfile.txt` for building a containerized version of the app.
+This project includes a `Dockerfile` for building a containerized version of the app.
 
 ### Build the Image
 
 ```bash
-docker build -f Dockerfile.txt -t pitch-caller .
+docker build -f Dockerfile -t pitch-caller .
 ```
 
 ### Run the Container
