@@ -1,7 +1,7 @@
 import React from 'react';
 import { PitchDefinition, WristbandConfig, PitchType } from '../types';
 import { WRISTBAND_GRID_SIZES, COLORS } from '../constants';
-import { Plus, Trash2, Printer, RotateCcw, Play, Settings, List, Shield } from 'lucide-react';
+import { Plus, Trash2, Printer, RotateCcw, Play, Settings, List } from 'lucide-react';
 
 interface ControlsProps {
   config: WristbandConfig;
@@ -50,11 +50,24 @@ export const Controls: React.FC<ControlsProps> = ({
     <div className="w-full lg:w-[26rem] bg-white border-r border-slate-200 h-full overflow-y-auto flex flex-col no-print z-10">
       {/* Header */}
       <div className="p-5 border-b border-slate-100 bg-slate-900 text-white shadow-sm">
-        <h1 className="text-xl font-bold flex items-center gap-2 tracking-tight">
-          <Shield className="w-6 h-6 text-indigo-400" />
-          PitchCaller
-        </h1>
-        <p className="text-xs text-slate-400 mt-1 font-medium">Advanced Wristband Generator</p>
+        <div className="flex items-center gap-3">
+          <div className="relative w-10 h-10 flex-shrink-0">
+            <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="45" fill="#FACC15" stroke="#EAB308" strokeWidth="2" />
+              <path d="M28 20 C 12 35, 12 65, 28 80" fill="none" stroke="#DC2626" strokeWidth="4" strokeLinecap="round" />
+              <path d="M72 20 C 88 35, 88 65, 72 80" fill="none" stroke="#DC2626" strokeWidth="4" strokeLinecap="round" />
+              {/* Stitches */}
+              <path d="M20 28 l 10 -4 M16 40 l 10 -2 M15 50 l 10 0 M16 60 l 10 2 M20 72 l 10 4" stroke="#DC2626" strokeWidth="3" strokeLinecap="round" />
+              <path d="M70 24 l 10 4 M74 40 l 10 2 M75 50 l 10 0 M74 60 l 10 -2 M70 76 l 10 -4" stroke="#DC2626" strokeWidth="3" strokeLinecap="round" />
+            </svg>
+          </div>
+          <div>
+            <h1 className="text-xl font-bold tracking-tight leading-none">
+              PitchCaller
+            </h1>
+            <p className="text-xs text-slate-400 mt-1 font-medium">Advanced Wristband Generator</p>
+          </div>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto custom-scrollbar">

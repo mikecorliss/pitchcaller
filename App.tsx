@@ -5,7 +5,7 @@ import { PrintLayout } from './components/PrintLayout';
 import { CoachKey } from './components/CoachKey';
 import { DEFAULT_PITCHES, WRISTBAND_GRID_SIZES } from './constants';
 import { PitchDefinition, SignalEntry, WristbandConfig } from './types';
-import { AlertCircle, CheckCircle2 } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Printer } from 'lucide-react';
 
 const App: React.FC = () => {
   // --- State ---
@@ -30,11 +30,10 @@ const App: React.FC = () => {
   const [signals, setSignals] = useState<SignalEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // --- Effects ---
   useEffect(() => {
-    // Initial generation on mount if empty? No, let user choose.
-    // Actually, let's clear on mount to force user to see the state
     handleReset();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -54,6 +53,11 @@ const App: React.FC = () => {
   const handleGenerate = () => {
     setError(null);
     setSuccessMsg(null);
+    
+    // Close sidebar on mobile after generation
+    if (window.innerWidth < 1024) {
+      setIsSidebarOpen(false);
+    }
     
     const totalPercentage = pitches.reduce((sum, p) => sum + (p.percentage || 0), 0);
     
@@ -129,25 +133,85 @@ const App: React.FC = () => {
 
   // --- Render ---
   return (
-    <div className="h-screen w-screen flex overflow-hidden bg-slate-100 font-sans text-slate-900">
-      {/* Sidebar */}
-      <Controls
-        config={config}
-        setConfig={setConfig}
-        pitches={pitches}
-        setPitches={setPitches}
-        onGenerate={handleGenerate}
-        onReset={handleReset}
-      />
+    <div className="h-screen w-screen flex flex-col lg:flex-row overflow-hidden bg-slate-100 font-sans text-slate-900">
+      
+      {/* Mobile Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar Wrapper */}
+      <div className={`
+        fixed inset-y-0 left-0 z-50 h-full w-[85vw] max-w-sm bg-white shadow-2xl lg:shadow-none 
+        transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 lg:w-auto lg:z-auto
+        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+      `}>
+        {/* Mobile Close Button (Absolute positioned over the Controls header) */}
+        <button 
+          onClick={() => setIsSidebarOpen(false)}
+          className="absolute top-5 right-4 z-50 p-2 text-slate-400 hover:text-white lg:hidden focus:outline-none"
+          aria-label="Close sidebar"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+
+        <Controls
+          config={config}
+          setConfig={setConfig}
+          pitches={pitches}
+          setPitches={setPitches}
+          onGenerate={handleGenerate}
+          onReset={handleReset}
+        />
+      </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden relative no-print">
+      <div className="flex-1 flex flex-col h-full overflow-hidden relative no-print lg:pt-0 pt-16">
         
-        {/* Top Bar */}
-        <div className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 flex-shrink-0 shadow-sm z-10">
+        {/* Mobile Header (Fixed) */}
+        <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-slate-900 text-white flex items-center justify-between px-4 z-40 shadow-md">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setIsSidebarOpen(true)}
+              className="p-2 -ml-2 hover:bg-slate-800 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              aria-label="Open sidebar"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+              </svg>
+            </button>
+            <div className="flex items-center gap-2">
+              <svg viewBox="0 0 100 100" className="w-8 h-8 flex-shrink-0" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="45" fill="#FACC15" stroke="#EAB308" strokeWidth="2" />
+                <path d="M28 20 C 12 35, 12 65, 28 80" fill="none" stroke="#DC2626" strokeWidth="4" strokeLinecap="round" />
+                <path d="M72 20 C 88 35, 88 65, 72 80" fill="none" stroke="#DC2626" strokeWidth="4" strokeLinecap="round" />
+                <path d="M20 28 l 10 -4 M16 40 l 10 -2 M15 50 l 10 0 M16 60 l 10 2 M20 72 l 10 4" stroke="#DC2626" strokeWidth="3" strokeLinecap="round" />
+                <path d="M70 24 l 10 4 M74 40 l 10 2 M75 50 l 10 0 M74 60 l 10 -2 M70 76 l 10 -4" stroke="#DC2626" strokeWidth="3" strokeLinecap="round" />
+              </svg>
+              <span className="font-bold text-lg tracking-tight">PitchCaller</span>
+            </div>
+          </div>
+          {signals.length > 0 && (
+             <button
+               onClick={() => window.print()}
+               className="flex items-center gap-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 px-3 py-1.5 rounded text-white shadow-sm transition-colors"
+             >
+               <Printer size={16} />
+               PRINT
+             </button>
+          )}
+        </div>
+        
+        {/* Desktop Top Bar */}
+        <div className="hidden lg:flex h-16 bg-white border-b border-slate-200 items-center justify-between px-8 flex-shrink-0 shadow-sm z-10">
           <div className="flex items-center gap-4">
             <h2 className="text-lg font-bold text-slate-700">Wristband Preview</h2>
-            <div className="hidden md:flex items-center gap-2 text-xs text-slate-400 bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
+            <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
               <span>{config.columns * config.rows} slots</span>
               <span>•</span>
               <span>{config.sectionSize}x{config.sectionSize} grid</span>
@@ -171,15 +235,31 @@ const App: React.FC = () => {
           </div>
         </div>
 
+        {/* Mobile Alerts (Shown below header on mobile) */}
+        <div className="lg:hidden px-4 pt-4 flex flex-col gap-2">
+           {error && (
+             <div className="flex items-center gap-2 text-red-600 bg-red-50 px-3 py-2 rounded-md border border-red-100 text-xs font-medium">
+               <AlertCircle size={14} />
+               {error}
+             </div>
+           )}
+           {successMsg && (
+             <div className="flex items-center gap-2 text-green-600 bg-green-50 px-3 py-2 rounded-md border border-green-100 text-xs font-medium">
+               <CheckCircle2 size={14} />
+               {successMsg}
+             </div>
+           )}
+        </div>
+
         {/* Preview Canvas */}
-        <div className="flex-1 overflow-y-auto p-6 md:p-10 bg-slate-100/50">
-          <div className="max-w-7xl mx-auto flex flex-col xl:flex-row gap-10 items-start justify-center">
+        <div className="flex-1 overflow-y-auto p-4 md:p-10 bg-slate-100/50">
+          <div className="max-w-7xl mx-auto flex flex-col xl:flex-row gap-6 md:gap-10 items-start justify-center pb-10">
             
             {/* Player Card Preview */}
             <div className="flex flex-col gap-4 items-center flex-shrink-0 w-full xl:w-auto">
-              <div className="bg-white p-1 rounded-2xl shadow-xl border border-slate-200">
+              <div className="bg-white p-1 rounded-2xl shadow-xl border border-slate-200 overflow-x-auto max-w-full">
                  {/* Render actual preview */}
-                 <div className="p-4 bg-white rounded-xl">
+                 <div className="p-2 md:p-4 bg-white rounded-xl min-w-min">
                     <WristbandGrid 
                       config={config} 
                       signals={signals} 
@@ -195,7 +275,7 @@ const App: React.FC = () => {
 
             {/* Coach Key Preview */}
             <div className="flex flex-col gap-4 w-full max-w-2xl mx-auto xl:mx-0">
-               <div className="bg-white p-6 rounded-xl shadow-lg border border-slate-200 w-full">
+               <div className="bg-white p-4 md:p-6 rounded-xl shadow-lg border border-slate-200 w-full">
                   <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Coach Key Preview</h3>
                   <CoachKey 
                     pitches={pitches} 
