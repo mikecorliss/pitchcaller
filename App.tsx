@@ -22,10 +22,10 @@ const App: React.FC = () => {
     colStep: 10,
     rowStart: 1,
     rowStep: 1,
-    printWidth: 4.5,
-    printHeight: 2.75,
-    coachPrintWidth: 4.5,
-    coachPrintHeight: 2.75
+    printWidth: 3.75,
+    printHeight: 2.25,
+    coachPrintWidth: 6,
+    coachPrintHeight: 4
   });
 
   const [pitches, setPitches] = useState<PitchDefinition[]>(DEFAULT_PITCHES);
