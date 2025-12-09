@@ -18,10 +18,8 @@ export const PrintLayout: React.FC<PrintLayoutProps> = ({ config, signals, pitch
              <WristbandGrid config={config} signals={signals} pitches={pitches} isPrintMode={true} />
         </div>
 
-        {/* DASHED SEPARATOR */}
-        <div className="w-full max-w-[5in] border-t-2 border-dashed border-gray-300 flex justify-center relative mb-6">
-           <span className="bg-white px-2 text-[10px] text-gray-400 absolute -top-2">Cut Here</span>
-        </div>
+        {/* SPACER */}
+        <div className="w-full max-w-[5in] h-6 mb-6"></div>
 
         {/* COACHES KEY */}
         <div className="flex flex-col items-center mb-4">
