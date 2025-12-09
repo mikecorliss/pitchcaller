@@ -196,13 +196,21 @@ export const Controls: React.FC<ControlsProps> = ({
             {pitches.map((pitch) => (
               <div key={pitch.id} className="bg-white p-3 rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition-shadow group">
                 <div className="flex items-start gap-3 mb-2">
-                  <div className="relative">
+                  <div className="flex flex-col items-center gap-1.5">
                      <input
                         type="color"
                         value={pitch.color}
                         onChange={(e) => handleUpdatePitch(pitch.id, 'color', e.target.value)}
-                        className="w-8 h-8 rounded-md cursor-pointer border border-slate-200 p-0 overflow-hidden"
-                        title="Change Color"
+                        className="w-9 h-9 rounded-md cursor-pointer border border-slate-200 p-0 overflow-hidden shadow-sm"
+                        title="Pick Color"
+                      />
+                      <input 
+                        type="text"
+                        value={pitch.color}
+                        onChange={(e) => handleUpdatePitch(pitch.id, 'color', e.target.value)}
+                        className="w-16 text-[10px] font-mono text-center bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-slate-600 uppercase focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
+                        maxLength={7}
+                        placeholder="#000000"
                       />
                   </div>
                   <div className="flex-1 min-w-0">
