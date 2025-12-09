@@ -32,9 +32,8 @@ export const WristbandGrid: React.FC<WristbandGridProps> = ({ config, signals, p
   const getFontSize = () => {
     if (!isPrintMode) return { base: 'text-sm', abbr: 'text-sm', header: 'text-xs' };
     
-    // Fine-tuned print sizes
-    if (sectionSize === 5) return { base: 'text-[5px]', abbr: 'text-[5px]', header: 'text-[5px]' };
-    if (sectionSize === 4) return { base: 'text-[7px]', abbr: 'text-[6px]', header: 'text-[6px]' };
+    // User requested Dense and Pro sizes to match Standard
+    // Standard sizes:
     return { base: 'text-[9px]', abbr: 'text-[8.5px]', header: 'text-[8px]' };
   };
 

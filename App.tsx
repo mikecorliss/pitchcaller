@@ -23,7 +23,9 @@ const App: React.FC = () => {
     rowStart: 1,
     rowStep: 1,
     printWidth: 4.5,
-    printHeight: 2.75
+    printHeight: 2.75,
+    coachPrintWidth: 4.5,
+    coachPrintHeight: 2.75
   });
 
   const [pitches, setPitches] = useState<PitchDefinition[]>(DEFAULT_PITCHES);
@@ -133,7 +135,7 @@ const App: React.FC = () => {
 
   // --- Render ---
   return (
-    <div className="h-screen w-screen flex flex-col lg:flex-row overflow-hidden bg-slate-100 font-sans text-slate-900">
+    <div className="h-screen w-screen flex flex-col lg:flex-row overflow-hidden bg-slate-100 print:bg-white font-sans text-slate-900">
       
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
@@ -281,6 +283,9 @@ const App: React.FC = () => {
                     pitches={pitches} 
                     signals={signals} 
                   />
+                  <p className="text-xs font-medium text-slate-400 text-center mt-2">
+                    Actual Print Size: {config.coachPrintWidth}" x {config.coachPrintHeight}"
+                  </p>
                </div>
             </div>
 

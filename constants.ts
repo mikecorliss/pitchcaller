@@ -1,23 +1,23 @@
 import { PitchType, PitchDefinition } from './types';
 
-export const DEFAULT_PITCHES: PitchDefinition[] = [
-  { id: 'p1', type: PitchType.FASTBALL, name: 'Fastball', color: '#86efac', abbreviation: 'FB', percentage: 35 },
-  { id: 'p2', type: PitchType.CHANGEUP, name: 'Changeup', color: '#f9a8d4', abbreviation: 'CH', percentage: 20 },
-  { id: 'p3', type: PitchType.CURVEBALL, name: 'Curveball', color: '#fdba74', abbreviation: 'CU', percentage: 15 },
-  { id: 'p4', type: PitchType.RISEBALL, name: 'Riseball', color: '#93c5fd', abbreviation: 'RI', percentage: 10 },
-  { id: 'p5', type: PitchType.DROPBALL, name: 'Dropball', color: '#c4b5fd', abbreviation: 'DR', percentage: 10 },
-  { id: 'p6', type: PitchType.SCREWBALL, name: 'Screwball', color: '#67e8f9', abbreviation: 'SC', percentage: 10 },
-];
-
 export const COLORS = [
   '#ef4444', // Red
+  '#f97316', // Orange
+  '#eab308', // Yellow
   '#22c55e', // Green
   '#3b82f6', // Blue
-  '#eab308', // Yellow
   '#a855f7', // Purple
-  '#f97316', // Orange
   '#ec4899', // Pink
   '#64748b', // Slate
+];
+
+export const DEFAULT_PITCHES: PitchDefinition[] = [
+  { id: 'p1', type: PitchType.FASTBALL, name: 'Fastball', color: '#ef4444', abbreviation: 'FB', percentage: 35 },
+  { id: 'p2', type: PitchType.CHANGEUP, name: 'Changeup', color: '#f97316', abbreviation: 'CH', percentage: 20 },
+  { id: 'p3', type: PitchType.CURVEBALL, name: 'Curveball', color: '#eab308', abbreviation: 'CU', percentage: 15 },
+  { id: 'p4', type: PitchType.RISEBALL, name: 'Riseball', color: '#22c55e', abbreviation: 'RI', percentage: 10 },
+  { id: 'p5', type: PitchType.DROPBALL, name: 'Dropball', color: '#3b82f6', abbreviation: 'DR', percentage: 10 },
+  { id: 'p6', type: PitchType.SCREWBALL, name: 'Screwball', color: '#a855f7', abbreviation: 'SC', percentage: 10 },
 ];
 
 // 6 sections in a 3x2 layout

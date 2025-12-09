@@ -39,6 +39,10 @@ export interface WristbandConfig {
   // Dimensions in inches
   printWidth: number;
   printHeight: number;
+  
+  // Coach Key Dimensions
+  coachPrintWidth: number;
+  coachPrintHeight: number;
 }
 
 export interface GenerationParams {
