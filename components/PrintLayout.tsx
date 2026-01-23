@@ -11,22 +11,22 @@ interface PrintLayoutProps {
 
 export const PrintLayout: React.FC<PrintLayoutProps> = ({ config, signals, pitches }) => {
   return (
-    <div className="w-full bg-white flex flex-col items-center justify-start py-8 md:py-12 min-h-screen print:py-0 print:h-auto">
+    <div className="w-full min-w-fit bg-white flex flex-col items-center justify-start py-8 md:py-12 min-h-screen print:py-0 print:h-auto">
         
         {/* PLAYER CARD 1 */}
-        <div className="flex flex-col items-center mb-8 print:mb-4">
+        <div className="flex flex-col items-center mb-8 print:mb-4 px-4">
              <div className="mb-2 text-slate-400 text-xs font-medium uppercase tracking-wider print:hidden">Player Card 1</div>
              <WristbandGrid config={config} signals={signals} pitches={pitches} isPrintMode={true} />
         </div>
 
         {/* PLAYER CARD 2 */}
-        <div className="flex flex-col items-center mb-12 print:mb-8">
+        <div className="flex flex-col items-center mb-12 print:mb-8 px-4">
              <div className="mb-2 text-slate-400 text-xs font-medium uppercase tracking-wider print:hidden">Player Card 2</div>
              <WristbandGrid config={config} signals={signals} pitches={pitches} isPrintMode={true} />
         </div>
 
         {/* COACHES KEY */}
-        <div className="flex flex-col items-center mb-4">
+        <div className="flex flex-col items-center mb-4 px-4">
              <div className="mb-2 text-slate-400 text-xs font-medium uppercase tracking-wider print:hidden">Coach Key</div>
              <CoachKey 
                pitches={pitches} 

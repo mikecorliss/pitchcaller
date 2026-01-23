@@ -224,12 +224,14 @@ const App: React.FC = () => {
         </div>
 
         {/* Output Canvas (Print Layout View) */}
-        <div className="flex-1 overflow-x-hidden">
-             <PrintLayout 
-               config={config} 
-               signals={signals} 
-               pitches={pitches} 
-             />
+        <div className="flex-1 overflow-auto bg-slate-200/50">
+             <div className="min-w-fit w-full">
+               <PrintLayout 
+                 config={config} 
+                 signals={signals} 
+                 pitches={pitches} 
+               />
+             </div>
         </div>
 
       </div>
