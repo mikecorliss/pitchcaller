@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Controls } from './components/Controls';
-import { WristbandGrid } from './components/WristbandGrid';
 import { PrintLayout } from './components/PrintLayout';
-import { CoachKey } from './components/CoachKey';
 import { DEFAULT_PITCHES, WRISTBAND_GRID_SIZES } from './constants';
 import { PitchDefinition, SignalEntry, WristbandConfig } from './types';
 import { AlertCircle, CheckCircle2, Printer } from 'lucide-react';
@@ -135,7 +133,7 @@ const App: React.FC = () => {
 
   // --- Render ---
   return (
-    <div className="h-screen w-screen flex flex-col lg:flex-row overflow-hidden bg-slate-100 print:bg-white font-sans text-slate-900">
+    <div className="min-h-screen w-full flex flex-col lg:flex-row bg-slate-100 print:bg-white font-sans text-slate-900">
       
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
@@ -148,7 +146,7 @@ const App: React.FC = () => {
       {/* Sidebar Wrapper */}
       <div className={`
         fixed inset-y-0 left-0 z-50 h-full w-[85vw] max-w-sm bg-white shadow-2xl lg:shadow-none 
-        transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 lg:w-auto lg:z-auto
+        transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 lg:w-auto lg:z-40 lg:sticky lg:top-0 lg:h-screen
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         {/* Mobile Close Button (Absolute positioned over the Controls header) */}
@@ -173,10 +171,10 @@ const App: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden relative no-print lg:pt-0 pt-16">
+      <div className="flex-1 flex flex-col min-h-screen relative lg:pt-0 pt-16 print:pt-0">
         
         {/* Mobile Header (Fixed) */}
-        <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-slate-900 text-white flex items-center justify-between px-4 z-40 shadow-md">
+        <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-slate-900 text-white flex items-center justify-between px-4 z-40 shadow-md print:hidden">
           <div className="flex items-center gap-3">
             <button 
               onClick={() => setIsSidebarOpen(true)}
@@ -209,96 +207,32 @@ const App: React.FC = () => {
           )}
         </div>
         
-        {/* Desktop Top Bar */}
-        <div className="hidden lg:flex h-16 bg-white border-b border-slate-200 items-center justify-between px-8 flex-shrink-0 shadow-sm z-10">
-          <div className="flex items-center gap-4">
-            <h2 className="text-lg font-bold text-slate-700">Wristband Preview</h2>
-            <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
-              <span>{config.columns * config.rows} slots</span>
-              <span>•</span>
-              <span>{config.sectionSize}x{config.sectionSize} grid</span>
-            </div>
-          </div>
-
-          {/* Alerts */}
-          <div className="flex items-center gap-4">
-             {error && (
-               <div className="flex items-center gap-2 text-red-600 bg-red-50 px-4 py-1.5 rounded-md border border-red-100 text-sm font-medium animate-in fade-in slide-in-from-top-2">
-                 <AlertCircle size={16} />
-                 {error}
-               </div>
-             )}
-             {successMsg && (
-               <div className="flex items-center gap-2 text-green-600 bg-green-50 px-4 py-1.5 rounded-md border border-green-100 text-sm font-medium animate-in fade-in slide-in-from-top-2">
-                 <CheckCircle2 size={16} />
-                 {successMsg}
-               </div>
-             )}
-          </div>
-        </div>
-
-        {/* Mobile Alerts (Shown below header on mobile) */}
-        <div className="lg:hidden px-4 pt-4 flex flex-col gap-2">
-           {error && (
-             <div className="flex items-center gap-2 text-red-600 bg-red-50 px-3 py-2 rounded-md border border-red-100 text-xs font-medium">
-               <AlertCircle size={14} />
-               {error}
-             </div>
-           )}
-           {successMsg && (
-             <div className="flex items-center gap-2 text-green-600 bg-green-50 px-3 py-2 rounded-md border border-green-100 text-xs font-medium">
-               <CheckCircle2 size={14} />
-               {successMsg}
-             </div>
-           )}
-        </div>
-
-        {/* Preview Canvas */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-10 bg-slate-100/50">
-          <div className="max-w-7xl mx-auto flex flex-col xl:flex-row gap-6 md:gap-10 items-start justify-center pb-10">
-            
-            {/* Player Card Preview */}
-            <div className="flex flex-col gap-4 items-center flex-shrink-0 w-full xl:w-auto">
-              <div className="bg-white p-1 rounded-2xl shadow-xl border border-slate-200 overflow-x-auto max-w-full">
-                 {/* Render actual preview */}
-                 <div className="p-2 md:p-4 bg-white rounded-xl min-w-min">
-                    <WristbandGrid 
-                      config={config} 
-                      signals={signals} 
-                      pitches={pitches} 
-                      isPrintMode={false}
-                    />
-                 </div>
+        {/* Floating Alerts */}
+        <div className="fixed top-20 right-8 z-50 flex flex-col gap-2 pointer-events-none print:hidden">
+            {error && (
+              <div className="flex items-center gap-2 text-red-600 bg-red-50 px-4 py-3 rounded-lg border border-red-100 text-sm font-medium shadow-lg animate-in fade-in slide-in-from-top-2 pointer-events-auto">
+                <AlertCircle size={16} />
+                {error}
               </div>
-              <p className="text-xs font-medium text-slate-400 text-center">
-                 Actual Print Size: {config.printWidth}" x {config.printHeight}"
-              </p>
-            </div>
-
-            {/* Coach Key Preview */}
-            <div className="flex flex-col gap-4 w-full max-w-2xl mx-auto xl:mx-0">
-               <div className="bg-white p-4 md:p-6 rounded-xl shadow-lg border border-slate-200 w-full">
-                  <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Coach Key Preview</h3>
-                  <CoachKey 
-                    pitches={pitches} 
-                    signals={signals} 
-                  />
-                  <p className="text-xs font-medium text-slate-400 text-center mt-2">
-                    Actual Print Size: {config.coachPrintWidth}" x {config.coachPrintHeight}"
-                  </p>
-               </div>
-            </div>
-
-          </div>
+            )}
+            {successMsg && (
+              <div className="flex items-center gap-2 text-green-600 bg-green-50 px-4 py-3 rounded-lg border border-green-100 text-sm font-medium shadow-lg animate-in fade-in slide-in-from-top-2 pointer-events-auto">
+                <CheckCircle2 size={16} />
+                {successMsg}
+              </div>
+            )}
         </div>
-      </div>
 
-      {/* Print View (Hidden on Screen) */}
-      <PrintLayout 
-        config={config} 
-        signals={signals} 
-        pitches={pitches} 
-      />
+        {/* Output Canvas (Print Layout View) */}
+        <div className="flex-1 overflow-x-hidden">
+             <PrintLayout 
+               config={config} 
+               signals={signals} 
+               pitches={pitches} 
+             />
+        </div>
+
+      </div>
     </div>
   );
 };
